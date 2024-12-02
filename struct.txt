@@ -1,0 +1,16 @@
+ascom_challenge/
+├── backend/
+│   ├── server.js
+│   ├── package.json
+│   └── node_modules/
+├── frontend/
+│   ├── public/
+│   ├── src/
+│   │   ├── components/
+│   │   │   └── Patients.js
+│   │   ├── api.js
+│   │   ├── App.js
+│   │   ├── index.js
+│   ├── package.json
+│   └── node_modules/
+└── README.md
