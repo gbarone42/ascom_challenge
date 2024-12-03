@@ -1,3 +1,5 @@
+.
+
 ascom_challenge/
 ├── backend/
 │   ├── server.js
