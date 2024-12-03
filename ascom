@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# Define the paths
+FRONTEND_DIR=~/Desktop/folder/ooo/ascom_challenge/frontend
+BACKEND_DIR=~/Desktop/folder/ooo/ascom_challenge/backend
+
+# Function to handle errors
+handle_error() {
+    echo "$1"
+    exit 1
+}
+
+# Install dependencies in the frontend
+echo "Navigating to frontend directory..."
+cd "$FRONTEND_DIR" || handle_error "Frontend directory not found!"
+echo "Installing frontend dependencies..."
+npm install || handle_error "Frontend npm install failed!"
+
+# Start the backend server in the background
+echo "Navigating to backend directory..."
+cd "$BACKEND_DIR" || handle_error "Backend directory not found!"
+echo "Starting backend server..."
+nohup node server.js > output.log 2>&1 &  # Running backend server in the background
+if [ $? -ne 0 ]; then
+    handle_error "Backend server failed to start!"
+fi
+
+# Start the frontend
+echo "Navigating back to frontend directory..."
+cd "$FRONTEND_DIR" || handle_error "Frontend directory not found again!"
+echo "Starting frontend..."
+npm start || handle_error "Frontend npm start failed!"
