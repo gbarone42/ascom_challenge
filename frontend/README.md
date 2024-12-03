@@ -1,12 +1,3 @@
-# Install Dependencies
-After cloning the repository, run this command inside the project folder to install all dependencies listed in package.json:
-
-### `bash`
-
-### `npm install`
-
-
-
 
 
 
@@ -26,6 +17,15 @@ After cloning the repository, run this command inside the project folder /fronte
 ### `bash`
 
 ### `npm install`
+# Install Dependencies
+After cloning the repository, run this command inside the project folder to install all dependencies listed in package.json:
+
+### `bash`
+
+### `npm install`
+
+
+
 
 
 
