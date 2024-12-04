@@ -25,9 +25,13 @@ cd "$FRONTEND_DIR" || handle_error "Frontend directory not found!"
 echo "Installing frontend dependencies..."
 npm install || handle_error "Frontend npm install failed!"
 
-# Start the backend server in the background
+# Install dotenv in the backend
 echo "Navigating to backend directory..."
 cd "$BACKEND_DIR" || handle_error "Backend directory not found!"
+echo "Ensuring dotenv is installed..."
+npm install dotenv || handle_error "Backend npm install dotenv failed!"
+
+# Start the backend server in the background
 echo "Starting backend server..."
 nohup node server.js > output.log 2>&1 &  # Running backend server in the background
 if [ $? -ne 0 ]; then
