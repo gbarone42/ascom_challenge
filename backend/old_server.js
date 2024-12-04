@@ -8,12 +8,7 @@ const PORT = 3001;
 app.use(cors());
 app.use(express.json());
 
-// Root route (optional, to avoid "Cannot GET /" error)
-app.get('/', (req, res) => {
-    res.send('Backend is running');
-});
-
-// Endpoint to get patients
+// Endpoint per ottenere i pazienti
 app.get('/api/patients', async (req, res) => {
     try {
         const response = await axios.get('https://mobile.digistat.it/CandidateApi/Patient/GetList', {

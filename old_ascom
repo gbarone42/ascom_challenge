@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# Define the paths (absolute paths)
-FRONTEND_DIR=$(pwd)/frontend
-BACKEND_DIR=$(pwd)/backend
+# Define the paths
+FRONTEND_DIR=~/Desktop/folder/ooo/ascom_challenge/frontend
+BACKEND_DIR=~/Desktop/folder/ooo/ascom_challenge/backend
 
 # Function to handle errors
 handle_error() {
@@ -25,28 +25,8 @@ if [ $? -ne 0 ]; then
     handle_error "Backend server failed to start!"
 fi
 
-# Wait until the backend is up before opening the browser
-echo "Waiting for backend server to start..."
-while ! nc -z localhost 3001; do
-  sleep 1
-done
-echo "Backend is up, opening in the browser..."
-xdg-open http://localhost:3001 || handle_error "Failed to open backend page"
-
-# Open the specific backend endpoint in the browser
-echo "Opening backend API patients endpoint in the browser..."
-xdg-open http://localhost:3001/api/patients || handle_error "Failed to open API patients page"
-
-# Start the frontend server
+# Start the frontend
 echo "Navigating back to frontend directory..."
 cd "$FRONTEND_DIR" || handle_error "Frontend directory not found again!"
 echo "Starting frontend..."
 npm start || handle_error "Frontend npm start failed!"
-
-# Wait until the frontend is up before opening the browser
-echo "Waiting for frontend server to start..."
-while ! nc -z localhost 3000; do
-  sleep 1
-done
-echo "Frontend is up, opening in the browser..."
-xdg-open http://localhost:3000 || handle_error "Failed to open frontend page"
