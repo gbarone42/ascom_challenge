@@ -1,9 +1,11 @@
+require('dotenv').config(); // Load environment variables from .env
+
 const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json());
@@ -16,16 +18,16 @@ app.get('/', (req, res) => {
 // Endpoint to get patients
 app.get('/api/patients', async (req, res) => {
     try {
-        const response = await axios.get('https://mobile.digistat.it/CandidateApi/Patient/GetList', {
+        const response = await axios.get(process.env.API_URL, {
             auth: {
-                username: 'test',
-                password: 'TestMePlease!',
+                username: process.env.API_USERNAME,
+                password: process.env.API_PASSWORD,
             },
         });
         res.json(response.data);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Errore durante il fetch dei dati' });
+        res.status(500).json({ message: 'Errore durante il fetch dei dati', error: error.message });
     }
 });
 
