@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import moment from 'moment';
-import { fetchPatients } from '../api';
+import { fetchPatients, updatePatient } from '../api';
 import {
     Card,
     Typography,
@@ -25,32 +25,37 @@ const Patients = () => {
     const [filterSex, setFilterSex] = useState('');
     const [theme, setTheme] = useState('light');
     const [selectedPatient, setSelectedPatient] = useState(null);
+    const [editedPatient, setEditedPatient] = useState(null);
     const [sortModel, setSortModel] = useState([{ field: 'familyName', sort: 'asc' }]);
 
     useEffect(() => {
         const getPatients = async () => {
             try {
                 const data = await fetchPatients();
+    
+                // Map and include parameters and alarm fields
                 const uniquePatients = data.map((patient) => ({
                     id: patient.id,
                     familyName: patient.familyName,
                     givenName: patient.givenName,
                     sex: patient.sex,
                     birthDate: patient.birthDate
-                        ? moment(patient.birthDate).format('DD/MM/YYYY')
+                        ? moment(patient.birthDate).format('YYYY-MM-DD') // Keep consistent formatting
                         : 'Unknown',
+                    parameters: patient.parameters || [], // Ensure parameters is included
                     parametersCount: patient.parameters?.length || 0,
-                    alarm: patient.parameters?.some((param) => param.alarm) || false,
+                    alarm: patient.parameters?.some((param) => param.alarm) || false, // Include alarm logic
                 }));
-
+    
                 setPatients(uniquePatients);
             } catch (error) {
                 console.error('[ERROR] Error fetching patients:', error);
             }
         };
-
+    
         getPatients();
     }, []);
+    
 
     const handleSearch = (event) => {
         setSearchTerm(event.target.value);
@@ -63,6 +68,24 @@ const Patients = () => {
     const toggleTheme = () => {
         setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
     };
+
+    const handleEditChange = (field, value) => {
+        setEditedPatient({ ...editedPatient, [field]: value });
+    };
+
+    const handleUpdatePatient = async () => {
+        console.log('Updating patient with payload:', editedPatient); // Log payload
+        try {
+            await updatePatient(editedPatient);
+            setSelectedPatient(null);
+            setEditedPatient(null);
+            const data = await fetchPatients();
+            setPatients(data);
+        } catch (error) {
+            console.error('Error updating patient:', error);
+        }
+    };
+    
 
     const filteredPatients = patients.filter((patient) => {
         return (
@@ -77,63 +100,39 @@ const Patients = () => {
     const columns = [
         {
             field: 'familyName',
-            headerName: (
-                <Tooltip title="Click to sort by Family Name">
-                    <span>Family Name</span>
-                </Tooltip>
-            ),
+            headerName: 'Family Name',
             flex: 1,
-            sortable: true,
         },
         {
             field: 'givenName',
-            headerName: (
-                <Tooltip title="Click to sort by Given Name">
-                    <span>Given Name</span>
-                </Tooltip>
-            ),
+            headerName: 'Given Name',
             flex: 1,
-            sortable: true,
         },
         {
             field: 'sex',
-            headerName: (
-                <Tooltip title="Click to sort by Sex">
-                    <span>Sex</span>
-                </Tooltip>
-            ),
+            headerName: 'Sex',
             flex: 0.5,
-            sortable: true,
         },
         {
             field: 'birthDate',
-            headerName: (
-                <Tooltip title="Click to sort by Birth Date">
-                    <span>Birth Date</span>
-                </Tooltip>
-            ),
+            headerName: 'Birth Date',
             flex: 1,
-            sortable: true,
         },
         {
             field: 'parametersCount',
-            headerName: (
-                <Tooltip title="Click to sort by Parameters">
-                    <span>Parameters</span>
-                </Tooltip>
-            ),
+            headerName: 'Parameters',
             flex: 1,
-            sortable: true,
         },
         {
             field: 'alarm',
             headerName: 'Alarm',
             flex: 0.5,
-            sortable: false,
             renderCell: (params) =>
-                params.value ? <span style={{ color: 'red', fontWeight: 'bold' }}>⚠️ Alarm</span> : '',
+                params.value ? <span style={{ color: 'red', fontWeight: 'bold' }}>⚠️ Alarm</span> : 'No',
         },
     ];
+    
+    
 
     return (
         <div
@@ -231,22 +230,53 @@ const Patients = () => {
                         '& .row-even': { backgroundColor: '#f9f9f9' },
                         '& .row-odd': { backgroundColor: '#ffffff' },
                     }}
-                    onRowClick={(params) => setSelectedPatient(params.row)}
+                    onRowClick={(params) => {
+                        setSelectedPatient(params.row);
+                        setEditedPatient(params.row); // Initialize editing with selected patient
+                    }}
                 />
             </div>
             {selectedPatient && (
                 <Dialog open={true} onClose={() => setSelectedPatient(null)}>
-                    <DialogTitle style={{ color: '#007BFF' }}>Patient Details</DialogTitle>
+                    <DialogTitle style={{ color: '#007BFF' }}>Edit Patient Details</DialogTitle>
                     <DialogContent>
-                        <Typography variant="h6">
-                            {selectedPatient.familyName} {selectedPatient.givenName}
-                        </Typography>
-                        <Typography>Sex: {selectedPatient.sex}</Typography>
-                        <Typography>Birth Date: {selectedPatient.birthDate}</Typography>
-                        <Typography>Parameters Count: {selectedPatient.parametersCount}</Typography>
-                        <Typography>
-                            Alarm: {selectedPatient.alarm ? '⚠️ Yes' : 'No'}
-                        </Typography>
+                        <TextField
+                            label="Family Name"
+                            fullWidth
+                            value={editedPatient?.familyName || selectedPatient.familyName}
+                            onChange={(e) => handleEditChange('familyName', e.target.value)}
+                            style={{ marginBottom: '10px' }}
+                        />
+                        <TextField
+                            label="Given Name"
+                            fullWidth
+                            value={editedPatient?.givenName || selectedPatient.givenName}
+                            onChange={(e) => handleEditChange('givenName', e.target.value)}
+                            style={{ marginBottom: '10px' }}
+                        />
+                        <FormControl fullWidth style={{ marginBottom: '10px' }}>
+                            <InputLabel>Sex</InputLabel>
+                            <Select
+                                value={editedPatient?.sex || selectedPatient.sex}
+                                onChange={(e) => handleEditChange('sex', e.target.value)}
+                            >
+                                <MenuItem value="M">Male</MenuItem>
+                                <MenuItem value="F">Female</MenuItem>
+                            </Select>
+                        </FormControl>
+                        <button
+                            style={{
+                                backgroundColor: '#007BFF',
+                                color: 'white',
+                                padding: '10px 20px',
+                                border: 'none',
+                                borderRadius: '5px',
+                                cursor: 'pointer',
+                            }}
+                            onClick={handleUpdatePatient}
+                        >
+                            Save Changes
+                        </button>
                     </DialogContent>
                 </Dialog>
             )}

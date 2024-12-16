@@ -9,3 +9,13 @@ export const fetchPatients = async () => {
         return [];
     }
 };
+
+export const updatePatient = async (patientData) => {
+    try {
+        const response = await axios.post('http://localhost:3001/api/patients/update', patientData);
+        return response.data;
+    } catch (error) {
+        console.error('Error updating patient:', error);
+        throw error;
+    }
+};
