@@ -33,18 +33,17 @@ const Patients = () => {
             try {
                 const data = await fetchPatients();
     
-                // Map and include parameters and alarm fields
                 const uniquePatients = data.map((patient) => ({
                     id: patient.id,
                     familyName: patient.familyName,
                     givenName: patient.givenName,
                     sex: patient.sex,
                     birthDate: patient.birthDate
-                        ? moment(patient.birthDate).format('YYYY-MM-DD') // Keep consistent formatting
+                        ? moment(patient.birthDate).format('YYYY-MM-DD') // Properly format birthDate
                         : 'Unknown',
-                    parameters: patient.parameters || [], // Ensure parameters is included
-                    parametersCount: patient.parameters?.length || 0,
-                    alarm: patient.parameters?.some((param) => param.alarm) || false, // Include alarm logic
+                    parameters: patient.parameters || [], // Ensure parameters is defined
+                    parametersCount: patient.parameters?.length || 0, // Calculate parametersCount
+                    alarm: patient.parameters?.some((param) => param.alarm) || false, // Include alarm
                 }));
     
                 setPatients(uniquePatients);
@@ -55,6 +54,7 @@ const Patients = () => {
     
         getPatients();
     }, []);
+    
     
 
     const handleSearch = (event) => {
@@ -98,39 +98,25 @@ const Patients = () => {
     });
 
     const columns = [
-        {
-            field: 'familyName',
-            headerName: 'Family Name',
-            flex: 1,
-        },
-        {
-            field: 'givenName',
-            headerName: 'Given Name',
-            flex: 1,
-        },
-        {
-            field: 'sex',
-            headerName: 'Sex',
-            flex: 0.5,
-        },
-        {
-            field: 'birthDate',
-            headerName: 'Birth Date',
-            flex: 1,
-        },
+        { field: 'familyName', headerName: 'Family Name', flex: 1 },
+        { field: 'givenName', headerName: 'Given Name', flex: 1 },
+        { field: 'sex', headerName: 'Sex', flex: 0.5 },
+        { field: 'birthDate', headerName: 'Birth Date', flex: 1 },
         {
             field: 'parametersCount',
             headerName: 'Parameters',
             flex: 1,
+            renderCell: (params) => params.value || 0, // Ensure it shows 0 if undefined
         },
         {
             field: 'alarm',
             headerName: 'Alarm',
             flex: 0.5,
             renderCell: (params) =>
-                params.value ? <span style={{ color: 'red', fontWeight: 'bold' }}>⚠️ Alarm</span> : 'No',
+                params.value ? <span style={{ color: 'red', fontWeight: 'bold' }}>⚠️ Yes</span> : 'No',
         },
     ];
+    
     
     
 
